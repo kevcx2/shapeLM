@@ -1,10 +1,8 @@
 # shapeLM
 
-Parse and validate arbitrary LLM text into structured, typed data using JSON Schema.
+Parse and validate arbitrary LLM text into structured, typed data using JSON Schema. LLM providers have subtle differences in their native structured output implementations that are a pain to work around, and may have schema size limits.
 
-LLMs don't always return clean JSON. They wrap it in markdown, use trailing commas, leave strings unquoted, or bury the object in prose. shapeLM extracts, repairs, coerces, and validates that output against your schema — so you get typed data instead of string munging.
-
-Works with any LLM and any calling convention. No special "structured output" mode required.
+ShapeLM works with any LLM and any calling convention.
 
 ## Requirements
 
