@@ -156,9 +156,44 @@ describe('validateConstraints()', () => {
       expect(validateConstraints('user@example.com', c)).toHaveLength(0);
     });
 
-    it('email: invalid', () => {
+    it('email: valid with dots', () => {
+      const c = extractConstraints({ format: 'email' });
+      expect(validateConstraints('user.name@example.com', c)).toHaveLength(0);
+    });
+
+    it('email: invalid (no @)', () => {
       const c = extractConstraints({ format: 'email' });
       expect(validateConstraints('not-an-email', c)).toHaveLength(1);
+    });
+
+    it('email: rejects consecutive dots in domain', () => {
+      const c = extractConstraints({ format: 'email' });
+      expect(validateConstraints('user@example..com', c)).toHaveLength(1);
+    });
+
+    it('email: rejects consecutive dots in local part', () => {
+      const c = extractConstraints({ format: 'email' });
+      expect(validateConstraints('user..name@example.com', c)).toHaveLength(1);
+    });
+
+    it('email: rejects leading dot in local part', () => {
+      const c = extractConstraints({ format: 'email' });
+      expect(validateConstraints('.user@example.com', c)).toHaveLength(1);
+    });
+
+    it('email: rejects trailing dot in local part', () => {
+      const c = extractConstraints({ format: 'email' });
+      expect(validateConstraints('user.@example.com', c)).toHaveLength(1);
+    });
+
+    it('email: rejects leading dot in domain', () => {
+      const c = extractConstraints({ format: 'email' });
+      expect(validateConstraints('user@.example.com', c)).toHaveLength(1);
+    });
+
+    it('email: rejects trailing dot in domain', () => {
+      const c = extractConstraints({ format: 'email' });
+      expect(validateConstraints('user@example.com.', c)).toHaveLength(1);
     });
 
     it('date: valid', () => {
@@ -219,6 +254,69 @@ describe('validateConstraints()', () => {
     it('unknown format passes', () => {
       const c = extractConstraints({ format: 'custom-unknown' });
       expect(validateConstraints('anything', c)).toHaveLength(0);
+    });
+
+    // Date edge cases: impossible calendar dates should fail
+    it('date: rejects Feb 31 (impossible date)', () => {
+      const c = extractConstraints({ format: 'date' });
+      expect(validateConstraints('2024-02-31', c)).toHaveLength(1);
+    });
+
+    it('date: rejects Feb 29 in non-leap year', () => {
+      const c = extractConstraints({ format: 'date' });
+      expect(validateConstraints('2023-02-29', c)).toHaveLength(1);
+    });
+
+    it('date: accepts Feb 29 in leap year', () => {
+      const c = extractConstraints({ format: 'date' });
+      expect(validateConstraints('2024-02-29', c)).toHaveLength(0);
+    });
+
+    it('date: rejects June 31 (June has 30 days)', () => {
+      const c = extractConstraints({ format: 'date' });
+      expect(validateConstraints('2024-06-31', c)).toHaveLength(1);
+    });
+
+    it('date: rejects April 31 (April has 30 days)', () => {
+      const c = extractConstraints({ format: 'date' });
+      expect(validateConstraints('2024-04-31', c)).toHaveLength(1);
+    });
+
+    // Time edge cases: out-of-range values should fail
+    it('time: valid', () => {
+      const c = extractConstraints({ format: 'time' });
+      expect(validateConstraints('10:30:00', c)).toHaveLength(0);
+    });
+
+    it('time: rejects hour 25', () => {
+      const c = extractConstraints({ format: 'time' });
+      expect(validateConstraints('25:00:00', c)).toHaveLength(1);
+    });
+
+    it('time: rejects 99:99:99', () => {
+      const c = extractConstraints({ format: 'time' });
+      expect(validateConstraints('99:99:99', c)).toHaveLength(1);
+    });
+
+    it('time: accepts time with Z suffix', () => {
+      const c = extractConstraints({ format: 'time' });
+      expect(validateConstraints('10:30:00Z', c)).toHaveLength(0);
+    });
+
+    it('time: accepts time with +offset', () => {
+      const c = extractConstraints({ format: 'time' });
+      expect(validateConstraints('10:30:00+05:30', c)).toHaveLength(0);
+    });
+
+    it('time: accepts time with -offset', () => {
+      const c = extractConstraints({ format: 'time' });
+      expect(validateConstraints('10:30:00-05:00', c)).toHaveLength(0);
+    });
+
+    // Date-time edge cases
+    it('date-time: rejects impossible date in datetime', () => {
+      const c = extractConstraints({ format: 'date-time' });
+      expect(validateConstraints('2024-02-31T10:30:00Z', c)).toHaveLength(1);
     });
   });
 

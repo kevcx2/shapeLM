@@ -396,20 +396,68 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 const IPV4_RE = /^(\d{1,3}\.){3}\d{1,3}$/;
 const IPV6_RE = /^([0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4}$/;
 
+/**
+ * Validates that a YYYY-MM-DD string represents a real calendar date.
+ * Date.parse silently rolls over impossible dates (e.g. Feb 31 → Mar 3),
+ * so we parse the components and round-trip through Date to verify.
+ */
+function isValidCalendarDate(dateStr: string): boolean {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  // Construct in UTC to avoid timezone shifts
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  return (
+    dt.getUTCFullYear() === y &&
+    dt.getUTCMonth() === m - 1 &&
+    dt.getUTCDate() === d
+  );
+}
+
+/**
+ * Validates that the HH:MM:SS portion of a time string is in range.
+ */
+function isValidTimeRange(timeStr: string): boolean {
+  // Strip timezone suffix (Z, +05:30, -05:00) before parsing
+  const bare = timeStr.replace(/[Z+-].*$/, '');
+  const [hh, mm, ss] = bare.split(':').map(Number);
+  return hh >= 0 && hh <= 23 && mm >= 0 && mm <= 59 && ss >= 0 && ss <= 59;
+}
+
+/**
+ * Validates email addresses beyond the basic regex.
+ * Rejects: consecutive dots, leading/trailing dots in local or domain parts.
+ */
+function isValidEmail(email: string): boolean {
+  if (!EMAIL_RE.test(email)) return false;
+  // No consecutive dots anywhere
+  if (email.includes('..')) return false;
+  const [local, domain] = email.split('@');
+  // No leading/trailing dots in local part
+  if (local.startsWith('.') || local.endsWith('.')) return false;
+  // No leading/trailing dots in domain
+  if (domain.startsWith('.') || domain.endsWith('.')) return false;
+  return true;
+}
+
 function validateFormat(value: string, format: string): string | null {
   switch (format) {
     case 'email':
-      return EMAIL_RE.test(value) ? null : `"${value}" is not a valid email`;
+      return isValidEmail(value) ? null : `"${value}" is not a valid email`;
     case 'date':
-      return DATE_RE.test(value) && !isNaN(Date.parse(value))
+      return DATE_RE.test(value) && isValidCalendarDate(value)
         ? null
         : `"${value}" is not a valid date (expected YYYY-MM-DD)`;
     case 'date-time':
-      return DATETIME_RE.test(value) && !isNaN(Date.parse(value))
+      if (!DATETIME_RE.test(value) || isNaN(Date.parse(value))) {
+        return `"${value}" is not a valid date-time`;
+      }
+      // Extract the date portion and validate calendar correctness
+      return isValidCalendarDate(value.substring(0, 10))
         ? null
         : `"${value}" is not a valid date-time`;
     case 'time':
-      return TIME_RE.test(value) ? null : `"${value}" is not a valid time (expected HH:MM:SS)`;
+      return TIME_RE.test(value) && isValidTimeRange(value)
+        ? null
+        : `"${value}" is not a valid time (expected HH:MM:SS)`;
     case 'uri':
     case 'uri-reference':
       return URI_RE.test(value) ? null : `"${value}" is not a valid URI`;

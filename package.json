@@ -1,14 +1,46 @@
 {
-  "name": "structured-output-coercer",
+  "name": "shapelm",
   "version": "0.1.0",
   "description": "Parse and validate arbitrary LLM text into structured data using JSON Schema",
   "type": "module",
   "main": "dist/index.js",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "llm",
+    "json",
+    "schema",
+    "parser",
+    "validation",
+    "structured-output",
+    "ai",
+    "openai",
+    "anthropic"
+  ],
+  "author": "kevcx2",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevcx2/shapeLM.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kevcx2/shapeLM/issues"
+  },
+  "homepage": "https://github.com/kevcx2/shapeLM#readme",
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build && npm test"
   },
   "devDependencies": {
     "@types/node": "^25.2.3",

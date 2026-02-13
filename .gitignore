@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Test/dev caches
+.vite/
+coverage/
+
+# Environment
+.env
+.env.local
+
+# OS files
+.DS_Store
