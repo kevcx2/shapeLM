@@ -2,7 +2,7 @@
 
 Parse and validate arbitrary LLM text into structured, typed data using JSON Schema.
 
-Every LLM provider implements structured output differently — incompatible schema subsets, silent quirks, size limits. Instead of chasing each provider's constraints, ShapeLM skips structured output APIs entirely: send your schema to any model as plain text, then parse and validate the response.
+Every LLM provider implements structured outputs differently. This introduces subtle differences like incompatible schema subsets, silent quirks, size limits, etc. Instead of chasing each provider's constraints, ShapeLM skips structured output APIs entirely: send your schema to any model as plain text, then parse and validate the response.
 
 One schema. Any model. Any calling convention.
 
