@@ -15,19 +15,19 @@ One schema. Any model. Any calling convention.
 ## Installation
 
 ```bash
-npm install structured-output-coercer
+npm install shapelm
 ```
 
 If you want to use Zod schemas directly:
 
 ```bash
-npm install structured-output-coercer zod
+npm install shapelm zod
 ```
 
 ## Quick start
 
 ```typescript
-import { shape, prompt } from 'structured-output-coercer';
+import { shape, prompt } from 'shapelm';
 
 const schema = {
   type: 'object',
@@ -298,7 +298,7 @@ interface Shaper<T = unknown> {
 Example:
 
 ```typescript
-import { shaper } from 'structured-output-coercer';
+import { shaper } from 'shapelm';
 import { z } from 'zod';
 
 const MovieReview = z.object({
